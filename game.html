@@ -1,0 +1,1369 @@
+<!DOCTYPE html>
+<html lang="th">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cyber Survival: ภารกิจเอาชีวิตรอดบนเกาะปริศนา</title>
+    <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@400;600;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-color: #05070a;
+            --primary: #00ff88;
+            --danger: #ff0044;
+            --warning: #ffaa00;
+            --text-main: #f0f0f0;
+            --neon-glow: 0 0 15px var(--primary);
+            --danger-glow: 0 0 30px var(--danger);
+        }
+
+        * {
+            box-sizing: border-box;
+            font-family: 'Kanit', sans-serif;
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            background: var(--bg-color);
+            color: var(--text-main);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            overflow: hidden;
+            background-image: radial-gradient(circle at center, #111a22 0%, #05070a 100%);
+        }
+
+        /* Animated Particles Background */
+        #particles {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 1;
+            overflow: hidden;
+        }
+
+        .particle {
+            position: absolute;
+            background: rgba(0, 255, 136, 0.3);
+            border-radius: 50%;
+            box-shadow: 0 0 10px var(--primary);
+            animation: floatUp linear infinite;
+            bottom: -50px;
+        }
+
+        @keyframes floatUp {
+            0% {
+                transform: translateY(0) scale(1) translateX(0px);
+                opacity: 0;
+            }
+
+            50% {
+                opacity: 1;
+            }
+
+            100% {
+                transform: translateY(-110vh) scale(0.5) translateX(30px);
+                opacity: 0;
+            }
+        }
+
+        #flash-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: rgba(255, 0, 0, 0.3);
+            z-index: 999;
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 0.1s;
+        }
+
+        .flashing {
+            animation: sirenFlash 1s infinite alternate;
+        }
+
+        @keyframes sirenFlash {
+            0% {
+                opacity: 0;
+            }
+
+            100% {
+                opacity: 1;
+                box-shadow: inset 0 0 150px var(--danger);
+            }
+        }
+
+        .flashing-bg {
+            animation: bgSiren 0.5s infinite alternate;
+        }
+
+        @keyframes bgSiren {
+            0% {
+                background-color: #000;
+            }
+
+            100% {
+                background-color: #300;
+            }
+        }
+
+        #game-container {
+            width: 100%;
+            max-width: 1200px;
+            height: 95vh;
+            min-height: 700px;
+            background: #000;
+            border-radius: 20px;
+            box-shadow: var(--neon-glow);
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            border: 2px solid #2a3a50;
+            z-index: 10;
+        }
+
+        #scene-bg {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            opacity: 0.5;
+            z-index: 0;
+            transition: opacity 1s ease;
+            filter: saturate(1.2) contrast(1.1);
+        }
+
+        #body-bg-layer {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            object-fit: cover;
+            z-index: -10;
+            filter: blur(20px) opacity(0.3);
+            pointer-events: none;
+            transition: all 1s ease;
+        }
+
+        #night-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: rgba(0, 10, 40, 0);
+            z-index: 20;
+            mix-blend-mode: multiply;
+            pointer-events: none;
+            transition: background 1.5s ease;
+        }
+
+        #glass-panel {
+            position: relative;
+            z-index: 10;
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+            background: linear-gradient(to bottom, rgba(0, 0, 0, 0.8) 0%, rgba(0, 0, 0, 0.3) 40%, rgba(0, 0, 0, 0.9) 100%);
+        }
+
+        #top-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 25px;
+            border-bottom: 2px solid var(--primary);
+            background: rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(10px);
+        }
+
+        #top-left-stats {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        #team-avatars {
+            display: flex;
+            gap: 5px;
+        }
+
+        .team-avatar {
+            width: 35px;
+            height: 35px;
+            border-radius: 50%;
+            border: 2px solid var(--primary);
+            background: #fff;
+            color: #000;
+            text-align: center;
+            line-height: 31px;
+            font-size: 18px;
+        }
+
+        #hp-container {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-weight: bold;
+            font-size: 1.2rem;
+        }
+
+        #hp-bar-bg {
+            width: 120px;
+            height: 15px;
+            background: #333;
+            border-radius: 10px;
+            overflow: hidden;
+            border: 1px solid #555;
+        }
+
+        #hp-bar-fill {
+            width: 100%;
+            height: 100%;
+            background: var(--primary);
+            transition: width 0.3s;
+            box-shadow: 0 0 10px var(--primary);
+        }
+
+        #timer-container {
+            font-size: 1.5rem;
+            font-weight: 800;
+            color: var(--warning);
+            text-shadow: 0 0 10px var(--warning);
+            cursor: pointer;
+        }
+
+        .danger-text {
+            color: var(--danger) !important;
+            text-shadow: var(--danger-glow) !important;
+            animation: blink 0.5s infinite;
+        }
+
+        #inventory-container {
+            font-size: 1.1rem;
+            text-align: right;
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            max-width: 350px;
+            justify-content: flex-end;
+        }
+
+        .inv-item {
+            background: rgba(0, 255, 136, 0.2);
+            border: 1px solid var(--primary);
+            padding: 5px 10px;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 15px;
+            cursor: pointer;
+        }
+
+        .inv-item:hover {
+            background: var(--primary);
+            color: #000;
+            transform: scale(1.05);
+        }
+
+        #center-area {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            text-align: center;
+            overflow-y: auto;
+        }
+
+        #scene-emoji {
+            font-size: 110px;
+            margin-bottom: 20px;
+            text-shadow: 0 0 20px rgba(255, 255, 255, 0.4);
+            transition: opacity 1s ease;
+            opacity: 0;
+        }
+
+        .pop-in {
+            animation: popIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+        }
+
+        #story-box {
+            background: rgba(10, 15, 20, 0.85);
+            border: 1px solid var(--primary);
+            border-left: 8px solid var(--primary);
+            border-radius: 12px;
+            padding: 25px 35px;
+            margin-bottom: 20px;
+            max-width: 850px;
+            width: 100%;
+            box-shadow: var(--neon-glow);
+        }
+
+        #story-text {
+            font-size: 1.4rem;
+            line-height: 1.6;
+            text-align: left;
+        }
+
+        h1,
+        h2 {
+            margin-top: 0;
+            color: var(--primary);
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            text-shadow: var(--neon-glow);
+            text-align: center;
+        }
+
+        #action-area {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            justify-content: center;
+            width: 100%;
+            padding: 0 10px;
+            transition: opacity 1s ease;
+            opacity: 0;
+        }
+
+        button {
+            background: rgba(0, 0, 0, 0.6);
+            border: 2px solid var(--primary);
+            color: var(--primary);
+            padding: 15px 30px;
+            font-size: 1.2rem;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-weight: 800;
+            letter-spacing: 1px;
+            box-shadow: inset 0 0 10px rgba(0, 255, 136, 0.1), 0 0 10px rgba(0, 255, 136, 0.1);
+            backdrop-filter: blur(5px);
+        }
+
+        button:hover:not(:disabled) {
+            background: var(--primary);
+            color: #000;
+            box-shadow: 0 0 25px var(--primary);
+            transform: translateY(-3px) scale(1.05);
+        }
+
+        button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            border-color: #555;
+            color: #555;
+            box-shadow: none;
+            transform: none;
+            background: #222;
+        }
+
+        button.danger {
+            border-color: var(--danger);
+            color: var(--danger);
+            box-shadow: inset 0 0 10px rgba(255, 0, 68, 0.2);
+        }
+
+        button.danger:hover:not(:disabled) {
+            background: var(--danger);
+            color: #fff;
+            box-shadow: 0 0 25px var(--danger);
+        }
+
+        input[type="text"] {
+            padding: 15px 25px;
+            font-size: 1.3rem;
+            font-weight: bold;
+            border-radius: 10px;
+            border: 2px solid var(--primary);
+            background: rgba(0, 0, 0, 0.7);
+            color: #fff;
+            text-align: center;
+            width: 350px;
+            outline: none;
+            box-shadow: inset 0 0 10px rgba(0, 255, 136, 0.2);
+        }
+
+        input[type="text"]:focus {
+            box-shadow: 0 0 20px var(--primary);
+        }
+
+        .shake-fx {
+            animation: shake 0.4s cubic-bezier(.36, .07, .19, .97) both;
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        .float-anim {
+            animation: float 3s ease-in-out infinite;
+        }
+
+        .pulse-anim {
+            animation: pulseGlow 1.5s infinite;
+        }
+
+        .card-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+            width: 100%;
+            justify-items: center;
+        }
+
+        .sel-card {
+            background: rgba(0, 0, 0, 0.8);
+            border: 2px solid #555;
+            border-radius: 10px;
+            padding: 15px;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            width: 100%;
+            max-width: 180px;
+        }
+
+        .sel-card:hover {
+            border-color: var(--primary);
+            transform: translateY(-3px);
+        }
+
+        .sel-card.active {
+            border-color: var(--primary);
+            background: rgba(0, 255, 136, 0.2);
+            box-shadow: inset 0 0 10px var(--primary);
+        }
+
+        .char-img {
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            object-fit: cover;
+        }
+
+        .scene-img {
+            width: 100%;
+            max-width: 800px;
+            aspect-ratio: 16 / 9;
+            border-radius: 20px;
+            box-shadow: 0 0 30px rgba(0, 255, 136, 0.3);
+            border: 2px solid var(--primary);
+            object-fit: cover;
+            object-position: center;
+        }
+
+        .sel-icon .char-img {
+            width: 80px;
+            height: 80px;
+            border: 2px solid var(--primary);
+        }
+
+        .sel-icon {
+            font-size: 45px;
+            margin-bottom: 5px;
+            min-height: 45px;
+        }
+
+        .sel-name {
+            font-weight: bold;
+            font-size: 1.1rem;
+            color: var(--primary);
+        }
+
+        .sel-desc {
+            font-size: 0.9rem;
+            line-height: 1.3;
+            margin-top: 5px;
+            color: #ccc;
+        }
+
+        #decision-status {
+            width: 100%;
+            font-size: 1.4rem;
+            color: var(--warning);
+            text-shadow: 0 0 10px var(--warning);
+            text-align: center;
+            padding: 20px;
+            font-weight: bold;
+        }
+
+        @keyframes shake {
+
+            0%,
+            100% {
+                transform: translate(0, 0) rotate(0deg);
+            }
+
+            20% {
+                transform: translate(-5px, -5px) rotate(-2deg);
+            }
+
+            40% {
+                transform: translate(5px, 5px) rotate(2deg);
+            }
+
+            60% {
+                transform: translate(-5px, 5px) rotate(-1deg);
+            }
+
+            80% {
+                transform: translate(5px, -5px) rotate(1deg);
+            }
+        }
+
+        @keyframes popIn {
+            0% {
+                transform: scale(0.5);
+                opacity: 0;
+            }
+
+            100% {
+                transform: scale(1);
+                opacity: 1;
+            }
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes blink {
+
+            0%,
+            100% {
+                opacity: 1;
+            }
+
+            50% {
+                opacity: 0;
+            }
+        }
+
+        @keyframes float {
+
+            0%,
+            100% {
+                transform: translateY(0);
+            }
+
+            50% {
+                transform: translateY(-15px);
+            }
+        }
+
+        @keyframes pulseGlow {
+
+            0%,
+            100% {
+                filter: drop-shadow(0 0 10px var(--primary));
+                transform: scale(1);
+            }
+
+            50% {
+                filter: drop-shadow(0 0 30px var(--primary));
+                transform: scale(1.08);
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <div id="particles"></div>
+    <img id="body-bg-layer" src="">
+    <div id="night-overlay"></div>
+    <div id="flash-overlay"></div>
+
+    <div id="game-container">
+        <img id="scene-bg" src="" alt="">
+
+        <div id="glass-panel">
+            <div id="top-bar" class="hidden">
+                <div id="top-left-stats">
+                    <div id="team-avatars"></div>
+                    <div id="hp-container"><span>HP</span>
+                        <div id="hp-bar-bg">
+                            <div id="hp-bar-fill"></div>
+                        </div>
+                    </div>
+                    <div id="timer-container" onclick="skipWaitTimer()" title="Dev Cheat: ข้ามเวลา">⏱️ <span
+                            id="timer-text">05:00</span></div>
+                    <div id="time-display"
+                        style="font-size:1.2rem; font-weight:bold; color:var(--primary); margin-left:15px; text-shadow:0 0 10px var(--primary);">
+                        <span id="time-display-text">⏰ 08:00 (เช้า)</span>
+                    </div>
+                </div>
+                <div id="inventory-container"></div>
+            </div>
+
+            <div id="center-area">
+                <div id="scene-emoji"></div>
+                <div id="story-box">
+                    <div id="story-text">Loading...</div>
+                </div>
+                <div id="action-area"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Create animated background particles
+        const particleContainer = document.getElementById('particles');
+        for (let i = 0; i < 30; i++) {
+            let p = document.createElement('div'); p.className = 'particle';
+            p.style.left = Math.random() * 100 + 'vw'; p.style.width = p.style.height = (Math.random() * 15 + 5) + 'px';
+            p.style.animationDuration = (Math.random() * 10 + 5) + 's'; p.style.animationDelay = (Math.random() * 5) + 's';
+            particleContainer.appendChild(p);
+        }
+
+        const ASSETS = {
+            charSelect: '/Users/warinthon/.gemini/antigravity/brain/bb6e87b4-27b8-4ad8-acec-8d2db8ea59a4/char_select_1774795780769.png',
+            planeCrash: '/Users/warinthon/.gemini/antigravity/brain/bb6e87b4-27b8-4ad8-acec-8d2db8ea59a4/media__1774800910963.jpg',
+            mushroom: '/Users/warinthon/.gemini/antigravity/brain/bb6e87b4-27b8-4ad8-acec-8d2db8ea59a4/media__1774800910976.jpg',
+            tower: '/Users/warinthon/.gemini/antigravity/brain/bb6e87b4-27b8-4ad8-acec-8d2db8ea59a4/media__1774800910950.jpg',
+            phishing: '/Users/warinthon/.gemini/antigravity/brain/bb6e87b4-27b8-4ad8-acec-8d2db8ea59a4/media__1774800910918.jpg',
+            escape: '/Users/warinthon/.gemini/antigravity/brain/bb6e87b4-27b8-4ad8-acec-8d2db8ea59a4/media__1774800911101.jpg',
+        };
+
+        const CHAR_DB = [
+            { i: "<img src='asset/char_assault.png' class='char-img'>", n: "หน่วยจู่โจม", skill: "ซ่อมแซมได้ทุกอย่าง" },
+            { i: "<img src='asset/char_hunter.png' class='char-img'>", n: "นักล่า", skill: "ประสาทสัมผัสไว หลบกับดัก" },
+            { i: "<img src='asset/char_captain.png' class='char-img'>", n: "กัปตัน", skill: "ผู้นำสูงสุด" },
+            { i: "<img src='asset/char_detective.png' class='char-img'>", n: "นักสืบ", skill: "ค้นหาข้อมูล วางแผนเก่ง" },
+            { i: "<img src='asset/char_medic.png' class='char-img'>", n: "แพทย์", skill: "รักษาอาการบาดเจ็บ รอบคอบ" }
+        ];
+
+        const ITEM_DB = [
+            { id: "toolbox", i: "🧰", n: "กระเป๋าเครื่องมือ", req: "หน่วยจู่โจม" },
+            { id: "spray", i: "🦟", n: "สเปรย์ไล่แมลง", req: "นักล่า" },
+            { id: "map", i: "🗺️", n: "แผนที่หลบหนี", req: "กัปตัน" },
+            { id: "goggle", i: "📱", n: "แว่นเจาะระบบ", req: "นักสืบ" },
+            { id: "serum", i: "💊", n: "เซรุ่มต้านพิษ", req: "แพทย์" },
+            { id: "food", i: "🎒", n: "เสบียงด่วน", req: "ทุกคน" } // HP +20
+        ];
+
+        const STAGE_DB = [
+            {
+                id: 2, title: "ด่าน 2: หลบหนีออกจากยาน",
+                img: ASSETS.tower, icon: "<img src='asset/stage2_escape.png' class='scene-img'>",
+                desc: "เนื่องจากยานเกิดความเสียหาย ประตูทางออกฉุกเฉินเกิดล็อคอัตโนมัต ต้องใส่รหัสผ่านที่ปลอดภัยและถูกต้อง",
+                reqItem: "goggle", reqChar: "นักสืบไซเบอร์",
+                itemWinMsg: "<b style='color:var(--primary)'>นักสืบไซเบอร์ใช้แว่นเจาะระบบ แสกนหารหัสผ่านเพื่อออกจากยานสำเร็จ!</b>",
+                time: 150,
+                choices: [
+                    { label: "123456", value: "Fail", danger: false },
+                    { label: "password", value: "Fail", danger: false },
+                    { label: "Cyber_S@fe99", value: "Pass", labelClass: "primary" }
+                ],
+                passMsg: "<b style='color:var(--primary)'>ยอดเยี่ยม! มากเลือกรหัสผ่านได้ถูกต้อง ตอนนี้รีบหนี้ออกจากยานก่อนยานจะระเบิดกัน</b>",
+                failMsg: "<span style='color:var(--danger)'>รหัสผ่านไม่ถูกต้อง ออกจากยานไม่ทันเวลา ได้รับบาดเจ็บจากแรงระเบิด HP -20 </span>",
+                failDmg: 20
+            },
+            {
+                id: 3, title: "ด่านที่ 2 : อาหารฉุกเฉิน",
+                img: ASSETS.phishing, icon: "<img src='asset/stage3_mush.png' class='scene-img'>",
+                desc: "ผู้รอดชีวิตหลบหนีออกจากยานเครื่องบินได้สำเร็จ แต่ระหว่างทางเกิดหิวมาก พบเห็ดสีสวยงามอยู่ข้างทาง จงค้นหาวาเห็ดในภาพ กินได้หรือไม่ ",
+                reqItem: "food", reqChar: "แพทย์สนาม",
+                itemWinMsg: "<b style='color:var(--primary)'>โชคที่ดีเอาเสบียงด่วนมา เลยประทังความหิวไปได้</b>",
+                time: 180,
+                choices: [
+                    { label: "ผลการค้นหา", value: "Text" }
+                ],
+                textWin: ["กินไม่ได้", "มีพิษ", "อันตราย", "เช็คข้อมูล"],
+                passMsg: "<b style='color:var(--primary)'>เก่งมาก! ค้นข้อมูลวิจัยระบุชัดเจนว่าเป็นเห็ดพิษ! คิดวิเคราะห์ก่อนเชื่อเสมอ รอดตายหวุดหวิด!</b>",
+                failMsg: "<span style='color:var(--danger)'>เนื่องจากความไม่รอบคอบ กินเห็ดพิษเข้าไป ทำให้ท้องเสีย (HP -30)</span>",
+                failDmg: 30
+            },
+            {
+                id: 4, title: "ด่าน 4: วิกฤตแมลงป่า",
+                img: ASSETS.mushroom, icon: "<img src='asset/stage4_insects.png' class='scene-img'>",
+                desc: "ระหว่างทางผู้รอดชีวิตเจอกองทัพแมลงกดูดเลือดหลายชนิด จงหาวิธีป้องกันตัวเอง",
+                reqItem: "spray", reqChar: "กัปตัน",
+                itemWinMsg: "<b style='color:var(--primary)'>กัปตันใช้สเปรย์ไล่แมลง ป้องกันทุกคนจากแมลงดูดเลือดได้สำเร็จ!</b>",
+                time: 180,
+                choices: [
+                    { label: "เอาโคลนมาทาตัว", value: "Fail", },
+                    { label: "เอาน้ำผึ้งมาทาตัว", value: "Fail", },
+                    { label: "รีบวิ่งหนี", value: "Fail", },
+                    { label: "หาที่หลบ", value: "Fail", },
+                    { label: "ร้องไห้เรียกหาแม่", value: "Fail", },
+
+                ],
+                passMsg: "<b style='color:var(--primary)'>ดีมากที่พกยาฉีดแมลงมา ปลอดภัยไปอีก 1 วัน</b>",
+                failMsg: "<span style='color:var(--danger)'> ไม่ว่าทางไหนก็ไม่รอด โดนแมลงต่อยกันทุกคน (HP -10)</span>",
+                failDmg: 10
+            },
+            {
+                id: 5, title: "ด่าน 5: หอวิทยุสื่อสาร",
+                img: ASSETS.tower, icon: "<img src='asset/stage5_tower.png' class='scene-img'>",
+                desc: "เหล่าผู้รอดชีวิตเดิรทางมายังหอวิทยุสื่อสารรกร้าก พวกเขาเข้าไปสำรวจ พบคอมพิวเตอร์เก่า หากต้องการขอความช่วยเหลือจำทำอย่างไร",
+                time: 180,
+                choices: [
+                    { label: "เสียงปลั๊ก", value: "fail", },
+                    { label: "รีบส่งสัญญาณขอความช่วยเหลือ", value: "fail", },
+                    { label: "เช็ครอบๆให้แน่ใจก่อน", value: "Pass", }
+                ],
+                passMsg: "<b style='color:var(--primary)'>ดีแล้วทีี่ตรวจสอบก่อน</b>",
+                failMsg: "<span style='color:var(--danger)'> หอวิทยุสื่อสารไม่มีไฟฟ้า ต้องส่งคนออกไปซ่อมเครื่องปั่นไปด้านนอก  (HP -5)</span>",
+                failDmg: 5
+            },
+            {
+                id: 6, title: "ด่าน 6: หาแขนให้คอมพิวเตอร์",
+                img: ASSETS.phishing, icon: "<img src='asset/stage6_mouse.png' class='scene-img'>",
+                desc: "ซ่อมเครื่องปั่นไฟได้แล้ว เปิดคอมพิวเตอร์ติด แต่ไม่สามารถควบคุมได้ จะทำอย่างไร",
+                time: 150,
+                choices: [
+                    { label: "หาทางซ่อม", value: "Fail", },
+                    { label: "หาเมาส์มาต่อ", value: "Pass", },
+                    { label: "ลองสัมผัสหน้าจอ", value: "Fail", }
+                ],
+                passMsg: "<b style='color:var(--primary)'>ถูกต้อง! เพราะว่าเมาส์เปรียบเสมือนแขนของคอมพิวเตอร์ มีหน้าที่ควบคุมการทำงานของคอมพิวเตอร์</b>",
+                failMsg: "<span style='color:var(--danger)'>ไม่ถูกต้องเพราะ ไม่สามารถควบคุมคอมพิวเตอร์ได้ ทำให้ไม่สามารถส่งสัญญาณขอความช่วยเหลือได้ พลังงานหมด ต้องรอเครื่องปั่นไฟ (HP -30)</span>",
+                failDmg: 30
+            },
+            {
+                id: 7, title: "ด่าน 7: ข้อความประหลาดบนหน้าจอ",
+                img: ASSETS.mushroom, icon: "<img src='asset/stage7_phishing.png' class='scene-img'>",
+                desc: "หลังจากที่ส่งสัญญาณขอความช่วยเหลือได้แล้ว มีข้อความติดต่อกลับมา 2 ข้อความ 1. สวัสดีเราคือทีมช่วยเหลือ VIP จะไปรับคุณภายใน 1 ชั่วโมงโปรดคลิ๊กลิงก์นี้เพื่อยืนยันตัวตน <VIP888.casino.com> รอรับความช่วยเหลือและรางวัลได้เลย 2. สวัสดีเราคือทีมช่วยเหลือ จะไปรับคุณภายใน 2 ชั่วโมง <www.live.health.com> โปรดอยู่กับที่และรอความช่วยเหลือ",
+                reqItem: "goggle", reqChar: "นักสืบ",
+                itemWinMsg: "<b style='color:var(--primary)'>นักสืบสามารถสืบหาข้อมูลได้ว่าข้อความไหนเป็นข้อความหลอกลวง จึงปลอดภัย</b>",
+                time: 150,
+                choices: [
+                    { label: "ข้อความที่ 1", value: "Fail", },
+                    { label: "ข้อความที่ 2", value: "Pass", },
+                    { label: "ใช่ทั้งสองข้อความ", value: "Fail", },
+                    { label: "ไม่ใช่ทั้งสองข้อความ", value: "Fail", }
+                ],
+                passMsg: "<b style='color:var(--primary)'>เลือกตอบกลับข้อความได้ถูกต้อง จึงปลอดภัย</b>",
+                failMsg: "<span style='color:var(--danger)'>เลือกตอบกลับข้อความผิด จึงไม่ปลอดภัย ตอนนี้ถูกเก็บข้อมูลไปแล้ว (HP -30)</span>",
+                failDmg: 30
+            },
+            {
+                id: 8, title: "ด่าน 8: อุบัติเหตุ",
+                img: ASSETS.phishing, icon: "<img src='asset/stage8_laser.png' class='scene-img'>",
+                desc: "เกิดอุบัติเหตุภูเขาไปถล่ม ทำให้คนในทีมหวาดกลัวและได้รับบาดเจ็บ เพื่อความปลอดภัยเราต้องวิ่งหนีออกจากสถานีวิทยุ แต่ระหว่างทาง เกิดเจอกับดักเลเซอร์ เพื่อปิดการใข้งานต้องตอบคำถามให้ถูกต้อง คำถามคือ: สิ่งที่ทำให้คอมพิวเตอร์หลายเครื่องเชื่อมต่อกันได้",
+                reqItem: null,
+                time: 180,
+                choices: [
+                    { label: "สิ่งที่ทำให้คอมพิวเตอร์หลายเครื่องเชื่อมต่อกันได้", value: "Text" }
+                ],
+                textWin: ["อินเทอร์เน็ต", "internet", "Internet", "เน็ต"],
+                passMsg: "<b style='color:var(--primary)'>ถูกต้อง! อินเทอร์เน็ตคือสิ่งที่ทำให้คอมพิวเตอร์หลายเครื่องเชื่อมต่อกันได้</b>",
+                failMsg: "<span style='color:var(--danger)'>ไม่ถูกต้องเพราะ อินเทอร์เน็ตคือสิ่งที่ทำให้คอมพิวเตอร์หลายเครื่องเชื่อมต่อกันได้ โดนกัปดักเซอร์เล่นงาน(HP -20)</span>",
+                failDmg: 20
+            },
+            {
+                id: 9, title: "ด่านที่ 9: ถอดรหัสพิกัดหนีตาย",
+                img: ASSETS.escape, icon: "<img src='asset/stage9_gps.png' class='scene-img'>",
+                desc: "หนีออกจากกัปดักเลเซอร์ได้แล้ว ฮ. กู้ภัยติดต่อมาว่า \"ส่งพิกัดมาด่วน สัญญาณถูกกวน!\" พิกัด GPS ในเครื่องคอมรวนไปหมด มีตัวอักษรขยะปนอยู่เพียบ<br><br><span style='font-size: 2rem; color: var(--warning); letter-spacing: 5px; font-family: monospace;'>!@#dkck1onvpd3fhjdnjiksjd7lA5hd2#@!</span><br><br>มีเวลาแค่ 30 วินาที ในการพิมพ์เฉพาะ <b>\"ตัวเลขและตัวอักษรภาษาอังกฤษ\"</b> ออกมาให้ถูกต้องเพื่อระบุพิกัด!",
+                reqItem: "map", reqChar: "กัปตัน",
+                itemWinMsg: "<b style='color:var(--primary)'>กัปตันดึงแผนที่หลบหนีมากางเทียบพิกัด สามารถระบุตำแหน่งได้ทันที!</b>",
+                time: 30,
+                choices: [
+                    { label: "ระบุพิกัด", value: "Text" }
+                ],
+                textWin: ["13752", "13752"],
+                passMsg: "<b style='color:var(--primary)'>ยอดเยี่ยม! ส่งพิกัดได้ถูกต้อง ฮ. กู้ภัยกำลังมารับแล้ว!</b>",
+                failMsg: "<span style='color:var(--danger)'>ส่งพิกัดผิดพลาด ฮ. กู้ภัยหลงทาง ทำให้คุณต้องเสียเวลารอนานขึ้น โดนพิษจากเกาะเล่นงาน (HP -10)</span>",
+                failDmg: 10
+            },
+            {
+                id: 10, title: "ด่านที่ 10: จับคู่กู้ชีพ",
+                img: ASSETS.tower, icon: "<img src='asset/stage10_robot.png' class='scene-img'>",
+                desc: "ฮ. กู้ภัยได้รับสัญญาณและส่งตัวหุ่นยนต์มาช่วยแล้ว แต่ระหว่างทางหุ่นยนต์ดันเกิดความเสียหาย เพื่อช่วยให้หุ่นยนต์กลับมาใช้งาน จงจับคู่อุปกรณ์และหน้าที่ให้ถูกต้อง (จับคู่ผิด หัก 5 HP ต่อครั้ง)",
+                reqItem: "toolbox", reqChar: "กัปตัน",
+                itemWinMsg: "<b style='color:var(--primary)'>กัปตันใช้กระเป๋าเครื่องมือ ซ่อมแซมและประกอบอุปกรณ์หุ่นยนต์ได้อย่างรวดเร็ว! หุ่นยนต์พร้อมลุย!</b>",
+                time: 60,
+                type: "Match",
+                matches: [
+                    { left: "เมาส์", right: "ใช้คลิกและควบคุมทิศทางบนหน้าจอ" },
+                    { left: "คีย์บอร์ด", right: "ใช้พิมพ์ข้อความและคำสั่ง" },
+                    { left: "กล้อง", right: "ใช้ถ่ายภาพและวิดีโอ" },
+                    { left: "ลำโพง", right: "ส่งเสียงเตือนและสื่อสาร" }
+                ],
+                passMsg: "<b style='color:var(--primary)'>ประกอบหุ่นยนต์เสร็จสมบูรณ์! หุ่นยนต์พร้อมนำทางคุณไปที่ปลอดภัย!</b>",
+                failMsg: "<span style='color:var(--danger)'>ประกอบไม่ทัน หรือหุ่นยนต์ได้รับความเสียหายหนักเกินไป (HP -40)</span>",
+                failDmg: 40
+            },
+            {
+                id: 11, title: "ด่าน 11: ชาร์จพลังงานฉุกเฉิน! (The Great Escape)",
+                img: ASSETS.escape, icon: "<img src='asset/stage11_heli.png' class='scene-img'>",
+                desc: "ฮ. กู้ภัยมาถึงแล้ว! แต่พายุแม่เหล็กไซเบอร์ทำให้แบตเตอรี่ ฮ. ดับเกลี้ยง! วิธีเดียวที่จะสตาร์ทเครื่องได้คือ ทุกคนในทีมต้องช่วยกัน <b style='color:var(--warning)'>\"รัวคลิกที่ปุ่ม\"</b> ให้ครบ 50 ครั้ง!",
+                time: 15,
+                type: "Clicker",
+                clickTarget: 50,
+                passMsg: "<b style='color:var(--primary)'>ระบบชาร์จไฟติดแล้ว! ฮ. สตาร์ทเครื่องสำเร็จ! บินขึ้นสู่ผืนฟ้าออกจากเกาะมฤตยูอย่างปลอดภัย!</b>",
+                failMsg: "<span style='color:var(--danger)'>ชาร์จไฟไม่ทัน! ฮ. สตาร์ทไม่ติดและถูกพายุแม่เหล็กกลืนกิน (HP -100)</span>",
+                failDmg: 100
+            }
+        ];
+
+        let playerHP = 100; let selectedChars = []; let selectedItems = [];
+        let timerValue = 300; let timerInterval = null;
+        let audioCtx = null; let bgMusicLoop = null; let sirenOsc1, sirenOsc2, lfo, sirenGain;
+        let currentBgmId = 0;
+
+        // Deferred Decision System
+        let currentDecision = null; // { type: 'item'|'action'|'text', value: ... }
+        let currentStageId = -1;
+
+        const hpBarFill = document.getElementById('hp-bar-fill');
+        const invContainer = document.getElementById('inventory-container');
+        const teamAvatars = document.getElementById('team-avatars');
+        const emojiDisplay = document.getElementById('scene-emoji');
+        const textDisplay = document.getElementById('story-text');
+        const actionArea = document.getElementById('action-area');
+        const container = document.getElementById('game-container');
+        const topBar = document.getElementById('top-bar');
+        const sceneBg = document.getElementById('scene-bg');
+        const timerText = document.getElementById('timer-text');
+        const timerContainer = document.getElementById('timer-container');
+
+        // --- Audio System ---
+        function initAudio() { if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)(); if (audioCtx.state === 'suspended') audioCtx.resume(); }
+        function playTone(freq, type, duration, vol = 0.1) {
+            if (!audioCtx) return; const osc = audioCtx.createOscillator(); const gain = audioCtx.createGain();
+            osc.type = type; osc.frequency.setValueAtTime(freq, audioCtx.currentTime); osc.connect(gain); gain.connect(audioCtx.destination);
+            osc.start(); gain.gain.setValueAtTime(vol, audioCtx.currentTime); gain.gain.exponentialRampToValueAtTime(0.00001, audioCtx.currentTime + duration); osc.stop(audioCtx.currentTime + duration);
+        }
+        function playClick() { playTone(800, 'sine', 0.1, 0.1); }
+        function playSuccess() { playTone(500, 'sine', 0.1); setTimeout(() => playTone(800, 'sine', 0.2), 100); }
+        function playError() { playTone(150, 'sawtooth', 0.4, 0.3); shakeScreen(); }
+
+        function startBGM(stageId) {
+            if (bgMusicLoop) { clearTimeout(bgMusicLoop); bgMusicLoop = null; }
+            initAudio(); let tempo, notes, type;
+            currentBgmId++;
+            let thisBgmId = currentBgmId;
+
+            if (stageId <= 1) { tempo = 120; notes = [60, 0, 67, 0]; type = 'sine'; } // Menu
+            else if (stageId === 2) { tempo = 100; notes = [40, 43, 40, 47]; type = 'triangle'; } // Mushroom
+            else if (stageId === 3) { tempo = 160; notes = [72, 70, 72, 60, 60, 0]; type = 'square'; } // Laser Action
+            else if (stageId === 4) { tempo = 140; notes = [45, 0, 45, 57, 0, 0]; type = 'sawtooth'; } // Hack Tower
+            else if (stageId === 5) { tempo = 110; notes = [48, 51, 48, 55, 0]; type = 'sine'; } // Phishing / Medics
+            else { tempo = 150; notes = [60, 64, 67, 72, 0, 72, 67, 64]; type = 'triangle'; } // Escape/Win
+
+            let nextNoteTime = audioCtx.currentTime; let currentStep = 0;
+            function scheduleStep() {
+                if (thisBgmId !== currentBgmId) return; // Prevent multiple loops from running
+                while (nextNoteTime < audioCtx.currentTime + 0.1) {
+                    if (notes[currentStep] > 0) {
+                        const osc = audioCtx.createOscillator(); const gain = audioCtx.createGain(); osc.type = type;
+                        osc.frequency.setValueAtTime(440 * Math.pow(2, (notes[currentStep] - 69) / 12), nextNoteTime);
+                        osc.connect(gain); gain.connect(audioCtx.destination);
+                        osc.start(nextNoteTime); gain.gain.setValueAtTime(0.06, nextNoteTime);
+                        gain.gain.exponentialRampToValueAtTime(0.001, nextNoteTime + 0.15); osc.stop(nextNoteTime + 0.15);
+                    }
+
+                    if (currentStep % 4 === 0) {
+                        const kick = audioCtx.createOscillator(); const kickGain = audioCtx.createGain();
+                        kick.frequency.setValueAtTime(150, nextNoteTime); kick.frequency.exponentialRampToValueAtTime(10, nextNoteTime + 0.1);
+                        kick.connect(kickGain); kickGain.connect(audioCtx.destination); kick.start(nextNoteTime);
+                        kickGain.gain.setValueAtTime(0.3, nextNoteTime); kickGain.gain.exponentialRampToValueAtTime(0.01, nextNoteTime + 0.1); kick.stop(nextNoteTime + 0.1);
+                    }
+                    nextNoteTime += 0.25 * (60.0 / tempo); currentStep = (currentStep + 1) % notes.length;
+                }
+                bgMusicLoop = setTimeout(scheduleStep, 25);
+            }
+            scheduleStep();
+        }
+        function stopBGM() { if (bgMusicLoop) { clearTimeout(bgMusicLoop); bgMusicLoop = null; } }
+
+        function toggleSiren(state) {
+            if (!audioCtx) return; const overlay = document.getElementById('flash-overlay');
+            if (state) {
+                overlay.classList.add('flashing'); container.classList.add('flashing-bg');
+                sirenOsc1 = audioCtx.createOscillator(); sirenOsc2 = audioCtx.createOscillator(); lfo = audioCtx.createOscillator(); sirenGain = audioCtx.createGain();
+                sirenOsc1.type = 'square'; sirenOsc2.type = 'sawtooth'; lfo.type = 'sine'; sirenOsc1.frequency.value = 400; sirenOsc2.frequency.value = 400; lfo.frequency.value = 1;
+                const lfoGain = audioCtx.createGain(); lfoGain.gain.value = 250; lfo.connect(lfoGain); lfoGain.connect(sirenOsc1.frequency); lfoGain.connect(sirenOsc2.frequency);
+                sirenOsc1.connect(sirenGain); sirenOsc2.connect(sirenGain); sirenGain.connect(audioCtx.destination); sirenGain.gain.setValueAtTime(0.05, audioCtx.currentTime);
+                sirenOsc1.start(); sirenOsc2.start(); lfo.start();
+            } else {
+                overlay.classList.remove('flashing'); container.classList.remove('flashing-bg');
+                if (sirenGain) {
+                    sirenGain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.5);
+                    setTimeout(() => { if (sirenOsc1) sirenOsc1.stop(); if (sirenOsc2) sirenOsc2.stop(); if (lfo) lfo.stop(); sirenOsc1 = sirenOsc2 = lfo = sirenGain = null; }, 500);
+                }
+            }
+        }
+
+        function shakeScreen() { container.classList.remove('shake-fx'); void container.offsetWidth; container.classList.add('shake-fx'); }
+
+        // --- Core Logic ---
+        function hasChar(name) { return selectedChars.some(c => c.n === name); }
+
+        function updateUI() {
+            if (playerHP < 0) playerHP = 0; if (playerHP > 100) playerHP = 100;
+            hpBarFill.style.width = playerHP + '%';
+            if (playerHP <= 30) hpBarFill.style.backgroundColor = 'var(--danger)';
+            else if (playerHP <= 60) hpBarFill.style.backgroundColor = 'var(--warning)';
+            else hpBarFill.style.backgroundColor = 'var(--primary)';
+
+            invContainer.innerHTML = '';
+            selectedItems.forEach((item, idx) => {
+                const el = document.createElement('div'); el.className = 'inv-item';
+                el.innerText = `${item.i} ${item.n}`;
+                el.title = "คลิกเพื่อใช้ไอเทมนี้ในด่าน";
+                el.onclick = () => { setDecision({ type: 'item', value: item, idx: idx }); };
+                invContainer.appendChild(el);
+            });
+
+            teamAvatars.innerHTML = '';
+            selectedChars.forEach(c => { const el = document.createElement('div'); el.className = 'team-avatar'; el.innerHTML = c.i; el.title = c.n; teamAvatars.appendChild(el); });
+        }
+
+        function changeHP(amount) { playerHP += amount; if (amount < 0) playError(); updateUI(); if (playerHP <= 0 && currentStageId !== -10) { setTimeout(() => renderScene(-10), 1000); } }
+        function createBtn(label, onClickDOM, type = 'primary') { const b = document.createElement('button'); b.innerHTML = label; if (type === 'danger') b.classList.add('danger'); b.onclick = () => { playClick(); onClickDOM(); }; return b; }
+
+        // --- Deferred Decision Engine ---
+        function setDecision(decisionObj) {
+            if (timerValue <= 0) return; // Prevent late clicks
+            playClick(); currentDecision = decisionObj;
+            let ds = document.getElementById('decision-status');
+            if (!ds) { ds = document.createElement('div'); ds.id = 'decision-status'; actionArea.appendChild(ds); }
+
+            let dText = "ระบบบันทึกการตัดสินใจแล้ว...";
+            if (decisionObj.type === 'item') dText = `คุณเลือกใช้: ${decisionObj.value.n} <br><span style="font-size:1rem; color:#aaa">(รอประมวลผลเมื่อเวลาหมด)</span>`;
+            if (decisionObj.type === 'action') dText = `คุณเลือกตัวเลือก: ${decisionObj.label} <br><span style="font-size:1rem; color:#aaa">(การกระทำถูกล็อค รอผลเมื่อเวลาหมด)</span>`;
+            if (decisionObj.type === 'text') dText = `คุณพิมพ์ข้อมูล: "${decisionObj.value}" <br><span style="font-size:1rem; color:#aaa">(รอการวิเคราะห์)</span>`;
+
+            ds.innerHTML = dText;
+
+            // Hide puzzle buttons but keep status
+            Array.from(actionArea.children).forEach(child => { if (child.id !== 'decision-status') child.style.display = 'none'; });
+        }
+
+        function startStageTimer(seconds) {
+            timerValue = seconds; currentDecision = null; clearInterval(timerInterval);
+
+            timerInterval = setInterval(() => {
+                timerValue--;
+                let m = Math.floor(timerValue / 60); let s = timerValue % 60; timerText.innerText = `${m}:${s.toString().padStart(2, '0')}`;
+                if (timerValue <= 10) timerText.classList.add('danger-text'); else timerText.classList.remove('danger-text');
+
+                if (timerValue <= 0) {
+                    clearInterval(timerInterval); timerText.innerText = "0:00";
+                    evaluateStageResult(); // Evaluate what they chose ONLY NOW
+                }
+            }, 1000);
+        }
+
+        window.skipWaitTimer = function () { if (timerValue > 3) { playSuccess(); timerValue = 3; } }
+
+        function evaluateStageResult() {
+            actionArea.innerHTML = "";
+            let resultMsg = ""; let isSuccess = false;
+
+            let stageConf = null; let nextStage = currentStageId + 1;
+            if (currentStageId >= 2 && currentStageId <= 11) {
+                stageConf = STAGE_DB.find(s => s.id === currentStageId);
+                if (currentStageId === 11) nextStage = 12; // Win
+            }
+
+            // General Item Check Logic (If they used an item)
+            if (currentDecision && currentDecision.type === 'item') {
+                const it = currentDecision.value;
+                // Pre-process consumption
+                selectedItems.splice(currentDecision.idx, 1); updateUI();
+
+                if (it.id === "food" && stageConf && stageConf.reqItem !== "food") {
+                    changeHP(20); resultMsg = "<b style='color:var(--primary)'>[เสบียง] กินเสบียงด่วน ฟื้นฟู +20 HP แต่ไม่ได้ช่วยแก้ปริศนาในด่านนี้! โดนความเสียหายพื้นฐาน</b>";
+                    changeHP(- (stageConf ? stageConf.failDmg : 20)); isSuccess = true;
+                } else if (it.req && it.req !== "ทุกคน" && !hasChar(it.req)) {
+                    // 특수 조건: ด่าน 10 อนุญาตให้กัปตันใช้ toolbox ได้แม้ไม่ใช่หน่วยจู่โจม
+                    if (currentStageId === 10 && it.id === 'toolbox' && hasChar("กัปตัน")) { }
+                    else {
+                        changeHP(-30); resultMsg = `<span style='color:var(--danger)'>[วิกฤต] คุณเลือกใช้ ${it.n} แต่ไม่มี <b>${it.req}</b> ในทีมส่งผลให้ใช้ผิดวิธี! ระบบช็อต ไฟลัดวงจร (HP -30)!</span>`;
+                        isSuccess = false;
+                    }
+                } else if (stageConf) {
+                    // Check if item matches the specific stage requirement
+                    if (stageConf.reqItem === it.id) {
+                        isSuccess = true; resultMsg = stageConf.itemWinMsg;
+                        if (it.id === "food") changeHP(20); // Food item boost applied manually inside msg mostly, but lets add 20 manually
+                    } else {
+                        changeHP(-stageConf.failDmg);
+                        resultMsg = `<span style='color:var(--warning)'>คนในทีมมีประสบการณ์ใช้ ${it.n} ได้ถูกวิธี แต่มันไม่เกี่ยวอะไรกับอุปสรรคตรงหน้าเลยลูกเอ๊ย! เสียเวลาเปล่า โดนอุปสรรคเล่นงาน (HP -${stageConf.failDmg})</span>`;
+                        isSuccess = true;
+                    }
+                } else {
+                    isSuccess = true;
+                }
+            } else if (currentDecision && currentDecision.type === 'setup') {
+                isSuccess = true;
+                if (currentStageId === 0) resultMsg = "<b style='color:var(--primary)'>อัปโหลดจิตใต้สำนึก ความสามารถตัวละครเข้าตัวเราเสร็จสิ้น!</b>";
+                else if (currentStageId === 1) resultMsg = "<b style='color:var(--primary)'>สำรวจซากเครื่องบินและเก็บของยังชีพครบถ้วน!</b>";
+            } else if (!currentDecision) {
+                // Did nothing! Time out
+                if (currentStageId === 0 || currentStageId === 1) {
+                    isSuccess = true;
+                    resultMsg = "<b style='color:var(--warning)'>หมดเวลา! ระบบจะบันทึกเครื่องมือตามที่คุณเลือกไว้ (ถ้าไม่มีก็จะเดินตัวเปล่า) และลุยกันเลย!</b>";
+                } else if (stageConf) {
+                    changeHP(-stageConf.failDmg);
+                    resultMsg = stageConf.failMsg ? stageConf.failMsg : `<span style='color:var(--danger)'>มัวยืนเหม่อ หมดเวลา! ระบบอุปสรรคโจมตีอัตโนมัติ (HP -${stageConf.failDmg})!</span>`;
+                    isSuccess = true; // Proceed anyway if not dead
+                }
+            } else if (stageConf) {
+                // Data Driven Action Logic
+                const act = currentDecision.value;
+                if (currentDecision.type === 'action') {
+                    if (act === 'Pass') {
+                        isSuccess = true; resultMsg = stageConf.passMsg; playSuccess();
+                    } else {
+                        changeHP(-stageConf.failDmg); isSuccess = true; resultMsg = stageConf.failMsg;
+                    }
+                } else if (currentDecision.type === 'text') {
+                    const passed = stageConf.textWin.some(keyword => act.includes(keyword));
+                    if (passed) {
+                        isSuccess = true; resultMsg = stageConf.passMsg; playSuccess();
+                    } else {
+                        changeHP(-stageConf.failDmg); isSuccess = true; resultMsg = stageConf.failMsg;
+                    }
+                }
+            }
+
+            setTimeout(() => {
+                textDisplay.innerHTML += `<br><br><div class="float-anim" style="background:rgba(0,0,0,0.85); padding:15px; border-radius:10px; border:2px solid var(--primary); box-shadow:0 0 15px rgba(0,255,136,0.3);">${resultMsg}</div>`;
+                if (playerHP > 0 && isSuccess) {
+                    let btnText = "ประตูเปิด 🚀 ลุยเลย!";
+                    if (currentStageId === 0) btnText = "สำรวจซากเครื่องบิน 🚀";
+                    else if (currentStageId === 1) btnText = "ลุยเกาะปริศนาด่านแรก 🚀";
+                    else if (currentStageId === 11) btnText = "สรุปผลคะแนนชีวิต! 🚀";
+                    actionArea.appendChild(createBtn(btnText, () => renderScene(nextStage)));
+                }
+            }, 1000); // Dramatic pause
+        }
+
+        function typewriterTransition(textStr, onComplete) {
+            textDisplay.innerHTML = "";
+            actionArea.style.opacity = '0';
+            actionArea.innerHTML = "";
+            emojiDisplay.style.opacity = '0';
+            emojiDisplay.classList.remove('pop-in');
+            sceneBg.style.opacity = '0';
+            timerContainer.classList.add('hidden');
+
+            toggleSiren(true);
+
+            let i = 0;
+            let isTag = false;
+            let textOut = "";
+
+            let typingTimer = setInterval(() => {
+                if (i >= textStr.length) {
+                    clearInterval(typingTimer);
+
+                    setTimeout(() => {
+                        toggleSiren(false);
+                        sceneBg.style.opacity = '0.5';
+                        emojiDisplay.style.opacity = '1';
+                        emojiDisplay.classList.add('pop-in');
+                        actionArea.style.opacity = '1';
+
+                        if (onComplete) onComplete();
+                    }, 1000);
+
+                    return;
+                }
+
+                let char = textStr[i];
+
+                if (char === "<") isTag = true;
+                if (char === ">") isTag = false;
+
+                textOut += char;
+                textDisplay.innerHTML = textOut;
+
+                i += isTag ? 1 : 1;
+            }, isTag ? 0 : 30);
+        }
+
+        function renderScene(stateId) {
+            clearInterval(timerInterval); currentDecision = null; currentStageId = stateId; startBGM(stateId); toggleSiren(false);
+            if (stateId === -1 || stateId === -10 || stateId === 12) topBar.classList.add('hidden'); else topBar.classList.remove('hidden');
+
+            const bodyBgLayer = document.getElementById('body-bg-layer');
+            const nightOverlay = document.getElementById('night-overlay');
+            const timeDisplayText = document.getElementById('time-display-text');
+
+            let hour = 8;
+            let intensity = 0;
+            if (stateId >= 2 && stateId <= 11) {
+                hour = 8 + (stateId - 1) * 1.5;
+                intensity = ((stateId - 1) / 10);
+            } else if (stateId === 12 || stateId === -10) {
+                intensity = 0.8;
+            }
+
+            let hr = Math.floor(hour);
+            let min = (hour % 1) === 0.5 ? "30" : "00";
+            let timeOfDay = hr < 12 ? "เช้า" : (hr < 18 ? "บ่าย" : "ค่ำ");
+            if (timeDisplayText) timeDisplayText.innerHTML = `⏰ ${hr.toString().padStart(2, '0')}:${min} (${timeOfDay})`;
+            if (nightOverlay) nightOverlay.style.background = `rgba(0, 5, 25, ${intensity * 0.8})`;
+
+            switch (stateId) {
+                case -1: // Title
+                    sceneBg.src = ASSETS.escape; topBar.classList.add('hidden'); sceneBg.style.opacity = '0.3';
+                    textDisplay.innerHTML = "<h1>Cyber Survival</h1><h2>ภารกิจเอาชีวิตรอดบนเกาะปริศนา</h2>";
+                    emojiDisplay.innerHTML = "<img src='asset/planecrash.png' style='max-height: 480px; margin-top: 100px;'>"; emojiDisplay.classList.add('pop-in'); emojiDisplay.style.opacity = '1'; actionArea.style.opacity = '1';
+                    actionArea.innerHTML = ''; actionArea.appendChild(createBtn("เริ่มเกม", () => { initAudio(); startBGM(0); renderScene(0); }));
+                    break;
+
+                case 0: // Char Select
+                    sceneBg.src = ASSETS.charSelect;
+                    let htmlOut0 = "<h1>อัปโหลดจิตใต้สำนึก...</h1><p>โปรดเลือก <b>ตัวละคร 3 ตัว</b> ทุกการตัดสินใจตอนจบด่าน จะส่งผลลัพธ์ที่คาดไม่ถึง!</p>";
+                    typewriterTransition(htmlOut0, () => {
+                        timerContainer.classList.remove('hidden'); startStageTimer(180);
+                        const cg = document.createElement('div'); cg.className = 'card-grid'; selectedChars = []; updateUI();
+                        CHAR_DB.forEach((c) => {
+                            const d = document.createElement('div'); d.className = 'sel-card';
+                            d.innerHTML = `<div class="sel-icon">${c.i}</div><div class="sel-name">${c.n}</div><div class="sel-desc">${c.skill}</div>`;
+                            d.onclick = () => {
+                                if (timerValue <= 0) return; playClick();
+                                if (d.classList.contains('active')) {
+                                    d.classList.remove('active');
+                                    selectedChars = selectedChars.filter(x => x.n !== c.n);
+                                } else {
+                                    if (selectedChars.length < 3) {
+                                        d.classList.add('active');
+                                        selectedChars.push(c);
+                                    }
+                                }
+                                updateUI();
+                                if (selectedChars.length === 3) {
+                                    currentDecision = { type: 'setup', value: 'char' };
+                                    let ds = document.getElementById('decision-status');
+                                    if (!ds) { ds = document.createElement('div'); ds.id = 'decision-status'; actionArea.appendChild(ds); }
+
+                                } else {
+                                    currentDecision = null;
+                                    let ds = document.getElementById('decision-status'); if (ds) ds.remove();
+                                }
+                            };
+                            cg.appendChild(d);
+                        }); actionArea.appendChild(cg);
+                    });
+                    break;
+
+                case 1: // Item Select (FREE CHOICE)
+                    sceneBg.src = ASSETS.planeCrash; emojiDisplay.innerText = "🛩️💥";
+                    let htmlOut1 = "<h2>ซากเครื่องตก!</h2><p><b>เลือกไอเทม 3 ชิ้นอย่างอิสระ!</b> แต่จำไว้ว่า ถ้าตัวละครคุณใช้ไม่เป็น มันจะส่งผลร้ายแรง!</p>";
+                    typewriterTransition(htmlOut1, () => {
+                        timerContainer.classList.remove('hidden'); startStageTimer(180);
+                        const cg = document.createElement('div'); cg.className = 'card-grid'; selectedItems = []; updateUI();
+                        ITEM_DB.forEach((item) => {
+                            const d = document.createElement('div'); d.className = 'sel-card';
+                            d.innerHTML = `<div class="sel-icon">${item.i}</div><div class="sel-name">${item.n}</div>`;
+                            d.onclick = () => {
+                                if (timerValue <= 0) return; playClick();
+                                if (d.classList.contains('active')) {
+                                    d.classList.remove('active');
+                                    selectedItems = selectedItems.filter(x => x.n !== item.n);
+                                } else {
+                                    if (selectedItems.length < 3) {
+                                        d.classList.add('active');
+                                        selectedItems.push(item);
+                                    }
+                                }
+                                updateUI();
+                                if (selectedItems.length === 3) {
+                                    currentDecision = { type: 'setup', value: 'item' };
+                                    let ds = document.getElementById('decision-status');
+                                    if (!ds) { ds = document.createElement('div'); ds.id = 'decision-status'; actionArea.appendChild(ds); }
+                                    ds.innerHTML = "เลือกครบ 3 ชิ้นแล้ว! รอเวลาหมด หรือ กดคลิกที่เวลาด้านบนขวา เพื่อข้ามทันที!";
+                                } else {
+                                    currentDecision = null;
+                                    let ds = document.getElementById('decision-status'); if (ds) ds.remove();
+                                }
+                            };
+                            cg.appendChild(d);
+                        }); actionArea.appendChild(cg);
+                    });
+                    break;
+
+                case 12: // Win
+                    topBar.classList.add('hidden'); stopBGM(); playTone(500, 'sine', 0.2); setTimeout(() => playTone(600, 'sine', 0.2), 200); setTimeout(() => playTone(800, 'sine', 0.5), 400);
+                    sceneBg.src = ASSETS.escape; emojiDisplay.innerText = "🏆🎉"; emojiDisplay.classList.add('pop-in'); emojiDisplay.classList.add('pulse-anim'); emojiDisplay.style.opacity = '1'; actionArea.style.opacity = '1'; actionArea.innerHTML = '';
+                    textDisplay.innerHTML = `<h1>MISSION CLEARED!</h1><p style="font-size:1.6rem">เก่งมาก! ทีมของคุณทำภารกิจสำเร็จ ระบบปลอดภัย เอาความรู้นี้ไปใช้ในชีวิตจริงด้วยนะ!</p><p class="float-anim" style="color:var(--primary); font-size:2rem; font-weight:bold; letter-spacing:2px; text-shadow:0 0 15px var(--primary);">❤️ พลังชีวิตทีมเหลือ: ${playerHP} / 100 🛡️</p>`;
+                    actionArea.appendChild(createBtn("เล่นใหม่อีกครั้ง 🔄", () => { playerHP = 100; renderScene(-1); }));
+                    break;
+
+                case -10: // Game Over
+                    topBar.classList.add('hidden'); stopBGM(); toggleSiren(true);
+                    sceneBg.src = ''; emojiDisplay.innerText = "👻💀"; emojiDisplay.classList.add('pop-in'); emojiDisplay.classList.add('pulse-anim'); emojiDisplay.style.opacity = '1'; actionArea.style.opacity = '1'; actionArea.innerHTML = '';
+                    textDisplay.innerHTML = "<h1>GAME OVER</h1><p style='font-size:1.6rem'>น่าเสียดาย! ทุกคนพ่ายแพ้ต่ออุปสรรคและระบบไซเบอร์ด่านนี้... ไม่เป็นไรนะ ลองทำความเข้าใจใหม่แล้วสู้ใหม่!</p>";
+                    actionArea.appendChild(createBtn("เริ่มเกมใหม่ทั้งหมด 🔄", () => { playerHP = 100; renderScene(-1); }, "danger"));
+                    break;
+
+                default:
+                    if (stateId >= 2 && stateId <= 11) {
+                        const stageConf = STAGE_DB.find(s => s.id === stateId);
+                        if (!stageConf) break; // Fallback
+                        sceneBg.src = stageConf.img;
+                        if (bodyBgLayer && stageConf.img) bodyBgLayer.src = stageConf.img;
+                        emojiDisplay.innerHTML = stageConf.icon;
+                        emojiDisplay.classList.add('float-anim'); // Add floating animation to emoji
+
+                        let htmlOut = `<h2>${stageConf.title}</h2><p style="font-size:1.4rem;">${stageConf.desc}</p>`;
+                        typewriterTransition(htmlOut, () => {
+                            timerContainer.classList.remove('hidden'); startStageTimer(stageConf.time);
+                            // Render choices based on stage config
+                            if (stageConf.type === "Match") {
+                                let leftItems = stageConf.matches.map(m => m.left).sort(() => Math.random() - 0.5);
+                                let rightItems = stageConf.matches.map(m => m.right).sort(() => Math.random() - 0.5);
+
+                                let matchContainer = document.createElement('div');
+                                matchContainer.style = 'display:flex; justify-content:center; width:100%; gap:20px; flex-wrap:wrap;';
+
+                                let leftCol = document.createElement('div'); leftCol.style = 'flex:1; display:flex; flex-direction:column; gap:10px; min-width: 150px;';
+                                let rightCol = document.createElement('div'); rightCol.style = 'flex:1; display:flex; flex-direction:column; gap:10px; min-width: 300px;';
+
+                                let selectedLeft = null;
+                                let selectedRight = null;
+                                let matchedCount = 0;
+
+                                function tryMatch() {
+                                    if (selectedLeft && selectedRight) {
+                                        let isMatch = stageConf.matches.find(m => m.left === selectedLeft.dataset.val && m.right === selectedRight.dataset.val);
+                                        if (isMatch) {
+                                            selectedLeft.style.visibility = 'hidden';
+                                            selectedRight.style.visibility = 'hidden';
+                                            matchedCount++;
+                                            playSuccess();
+                                            if (matchedCount === stageConf.matches.length) {
+                                                setDecision({ type: 'action', value: 'Pass', label: 'ประกอบหุ่นยนต์สำเร็จ!' });
+                                                timerValue = 0; // evaluate instantly
+                                            }
+                                        } else {
+                                            selectedLeft.style.backgroundColor = ''; selectedLeft.style.color = '';
+                                            selectedRight.style.backgroundColor = ''; selectedRight.style.color = 'var(--warning)';
+
+                                            let floatText = document.createElement('div');
+                                            floatText.innerText = '-5 HP';
+                                            floatText.style = 'position:absolute; color:var(--danger); font-size:4rem; font-weight:bold; top:30%; left:50%; transform:translate(-50%,-50%); text-shadow:0 0 20px var(--danger); z-index:999; animation: floatUp 1s forwards; pointer-events:none;';
+                                            actionArea.appendChild(floatText);
+                                            setTimeout(() => floatText.remove(), 1000);
+
+                                            changeHP(-5);
+                                            playError();
+                                        }
+                                        selectedLeft = null; selectedRight = null;
+                                    }
+                                }
+
+                                leftItems.forEach(text => {
+                                    let b = createBtn(text, () => { }, "primary");
+                                    b.dataset.val = text;
+                                    b.onclick = () => {
+                                        if (timerValue <= 0) return;
+                                        playClick();
+                                        if (selectedLeft) { selectedLeft.style.backgroundColor = ''; selectedLeft.style.color = ''; }
+                                        selectedLeft = b;
+                                        b.style.backgroundColor = 'var(--primary)'; b.style.color = '#000';
+                                        tryMatch();
+                                    };
+                                    leftCol.appendChild(b);
+                                });
+
+                                rightItems.forEach(text => {
+                                    let b = createBtn(text, () => { }, "primary");
+                                    b.style.fontSize = '1.1rem'; b.style.padding = '10px 15px';
+                                    b.style.borderColor = 'var(--warning)';
+                                    b.style.color = 'var(--warning)';
+                                    b.style.boxShadow = 'inset 0 0 10px rgba(255, 170, 0, 0.1), 0 0 10px rgba(255, 170, 0, 0.1)';
+                                    b.dataset.val = text;
+                                    b.onclick = () => {
+                                        if (timerValue <= 0) return;
+                                        playClick();
+                                        if (selectedRight) { selectedRight.style.backgroundColor = ''; selectedRight.style.color = 'var(--warning)'; }
+                                        selectedRight = b;
+                                        b.style.backgroundColor = 'var(--warning)'; b.style.color = '#000';
+                                        tryMatch();
+                                    };
+                                    rightCol.appendChild(b);
+                                });
+
+                                matchContainer.appendChild(leftCol);
+                                matchContainer.appendChild(rightCol);
+                                actionArea.appendChild(matchContainer);
+                            } else if (stageConf.type === "Clicker") {
+                                let clickCount = 0;
+                                let clickBtn = document.createElement('button');
+                                clickBtn.innerHTML = `⚡ ชาร์จพลังงาน!<br><br><span style="font-size:2.5rem">${clickCount} / ${stageConf.clickTarget}</span>`;
+                                clickBtn.style.fontSize = '1.5rem';
+                                clickBtn.style.padding = '20px 60px';
+                                clickBtn.style.borderRadius = '20px';
+                                clickBtn.style.backgroundColor = 'var(--warning)';
+                                clickBtn.style.color = '#000';
+                                clickBtn.style.border = 'none';
+                                clickBtn.style.boxShadow = '0 0 20px var(--warning)';
+                                clickBtn.style.transition = 'transform 0.05s';
+
+                                clickBtn.onmousedown = () => { clickBtn.style.transform = 'scale(0.95)'; };
+                                clickBtn.onmouseup = () => { clickBtn.style.transform = 'scale(1)'; };
+                                clickBtn.ontouchstart = () => { clickBtn.style.transform = 'scale(0.95)'; };
+                                clickBtn.ontouchend = () => { clickBtn.style.transform = 'scale(1)'; };
+
+                                clickBtn.onclick = () => {
+                                    if (timerValue <= 0) return;
+                                    playClick();
+                                    clickCount++;
+                                    let progress = clickCount / stageConf.clickTarget;
+                                    clickBtn.innerHTML = `⚡ ชาร์จพลังงาน!<br><br><span style="font-size:2.5rem">${clickCount} / ${stageConf.clickTarget}</span>`;
+                                    clickBtn.style.boxShadow = `0 0 ${20 + progress * 50}px var(--primary)`;
+
+                                    if (clickCount >= stageConf.clickTarget) {
+                                        playSuccess();
+                                        clickBtn.innerHTML = `พลังงานเต็ม 100%!`;
+                                        clickBtn.style.backgroundColor = 'var(--primary)';
+                                        clickBtn.style.boxShadow = `0 0 50px var(--primary)`;
+                                        clickBtn.disabled = true;
+                                        setDecision({ type: 'action', value: 'Pass', label: 'ชาร์จไฟสำเร็จ' });
+                                    }
+                                };
+                                actionArea.appendChild(clickBtn);
+                            } else {
+                                stageConf.choices.forEach(ch => {
+                                    if (ch.value === "Text") {
+                                        const inp = document.createElement('input'); inp.type = 'text'; inp.placeholder = "พิมพ์คำสำคัญเพื่อค้นหา...";
+                                        const submitBtn = createBtn("ยืนยัน", () => { setDecision({ type: 'text', value: inp.value }); });
+                                        actionArea.appendChild(inp); actionArea.appendChild(submitBtn);
+                                    } else {
+                                        actionArea.appendChild(createBtn(ch.label, () => setDecision({ type: 'action', value: ch.value, label: ch.label }), ch.danger ? 'danger' : 'primary'));
+                                    }
+                                });
+                            }
+                        });
+                    }
+                    break;
+            }
+        }
+        renderScene(-1);
+    </script>
+</body>
+
+</html>
